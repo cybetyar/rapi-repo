@@ -16,20 +16,20 @@ def adatbazis():
 @app.route('/')
 def index():
     adatbazis()
-    con = sqlite3.connect("rapi.db")
-    con.row_factory = sqlite3.Row
-    cur = con.cursor()
-    cur.execute("select * from jegyek")
-    rows = cur.fetchall();
+    conn = sqlite3.connect("rapi.db")
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    cursor.execute("select * from jegyek")
+    rows = cursor.fetchall();
     return render_template("index.html", rows=rows)
     
 @app.route('/uj_jegy')
 def uj_jegy():
-    con = sqlite3.connect("rapi.db")
-    con.row_factory = sqlite3.Row
-    cur = con.cursor()
-    cur.execute("select max(id) from jegyek")
-    rows = cur.fetchall();
+    conn = sqlite3.connect("rapi.db")
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    cursor.execute("select max(id) from jegyek")
+    rows = cursor.fetchall();
     for data in rows:
         max_id = data[0]
     return render_template('uj_jegy.html', max_id = max_id)
@@ -42,19 +42,19 @@ def post_jegy():
             uj_email = request.form['uj_email']
             uj_datum = datetime.now()
             uj_kuldes = False
-            with sqlite3.connect("rapi.db") as con:
-                cur = con.cursor()
-                cur.execute("""INSERT INTO jegyek (nev,email,kuldes,datum)
+            with sqlite3.connect("rapi.db") as conn:
+                cursor = conn.cursor()
+                cursor.execute("""INSERT INTO jegyek (nev,email,kuldes,datum)
                 VALUES(?,?,?,?)""",(uj_nev,uj_email,uj_kuldes,uj_datum) )
-                con.commit()
+                conn.commit()
                 msg = "Hozzaadva"
         except:
-            con.rollback()
+            conn.rollback()
             msg = "Error - Van baj"
         finally:
-            #return render_template("hozaaadva.html", msg=msg)
-            return index(msg=msg)
-            con.close()
+            #return index(msg=msg) # ehhez majd kell def index(msg) -> return ... msg=msg
+            return index()
+            conn.close()
 
 def start_server():
     app.run(host='0.0.0.0', port=80)
