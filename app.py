@@ -4,6 +4,7 @@ import sys
 import threading
 import sqlite3
 from datetime import datetime
+from hashlib import sha256
 
 app = Flask(__name__)
 
@@ -32,7 +33,9 @@ def uj_jegy():
     rows = cursor.fetchall();
     for data in rows:
         max_id = data[0]
-    return render_template('uj_jegy.html', max_id = max_id)
+        current_id = int(max_id + 1)
+        new_qrcode = sha256(str(current_id).encode('utf-8')).hexdigest()
+    return render_template('uj_jegy.html', new_qrcode = new_qrcode)
 
 @app.route('/post_jegy', methods = ['POST'])
 def post_jegy():
