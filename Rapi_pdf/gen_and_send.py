@@ -26,7 +26,7 @@ def generate_and_send(qr_code,nev,email):
 
 #                         x0, y0, x1, y1
     img_rect = fitz.Rect(0,100,200,200)
-    page.insertImage(img_rect, filename="d:\\python\\Rapi_pdf\\qr_code.png", keep_proportion=True,align=1)
+    page.insertImage(img_rect, filename=qr_code, keep_proportion=True,align=1)
 
     document.save(outfile)
     document.close()
