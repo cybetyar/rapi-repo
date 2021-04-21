@@ -14,18 +14,13 @@
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css">
   <!-- CSS Files -->
   <link href="static/assets/css/material-dashboard.css?v=2.1.0" rel="stylesheet" />
-  <!-- CSS Just for demo purpose, don't include it in your project -->
-  <link href="static/assets/demo/demo.css" rel="stylesheet" />
+
 </head>
 
 <body class="dark-edition">
   <div class="wrapper ">
     <div class="sidebar" data-color="purple" data-background-color="black" data-image="static/assets/img/sidebar.png">
-      <!--
-        Tip 1: You can change the color of the sidebar using: data-color="purple | azure | green | orange | danger"
 
-        Tip 2: you can also add an image using data-image tag
-    -->
       <div class="logo"><a href="http://www.creative-tim.com" class="simple-text logo-normal">
           RapiTickets
         </a></div>
@@ -112,7 +107,7 @@
                           Jegy
                         </th>
                         <th>
-                          Küldés
+                          Küldés újra
                         </th>
                       </thead>
                       <tbody>
@@ -122,9 +117,9 @@
                           <td>{{row["nev"]}}</td>
                           <td>{{row["email"]}}</td>
                           {% if row["kuldes"] == 0 %}
-                              <td>Küldésre vár</td>
+                              <td>Kézbesítve</td>
                           {% else %}
-                              <td>Kiküldve</td>
+                              <td>Felhasználva</td>
                           {% endif %}
                           <td class="text-primary">Megtekintés</td>
                           <td><button class="btn btn-primary">Küldés</button></td>
@@ -157,8 +152,7 @@
   <script src="static/assets/js/plugins/bootstrap-notify.js"></script>
   <!-- Control Center for Material Dashboard: parallax effects, scripts for the example pages etc -->
   <script src="static/assets/js/material-dashboard.js?v=2.1.0"></script>
-  <!-- Material Dashboard DEMO methods, don't include it in your project! -->
-  <script src="static/assets/demo/demo.js"></script>
+
   <script>
     $(document).ready(function() {
       $().ready(function() {
