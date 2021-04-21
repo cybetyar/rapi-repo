@@ -33,6 +33,8 @@ def uj_jegy():
     rows = cursor.fetchall();
     for data in rows:
         max_id = data[0]
+        if max_id == None:
+            max_id = 0
         current_id = int(max_id + 1)
         new_qrcode = sha256(str(current_id).encode('utf-8')).hexdigest()
     return render_template('uj_jegy.html', new_qrcode = new_qrcode)
