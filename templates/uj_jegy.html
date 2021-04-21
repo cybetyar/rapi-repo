@@ -20,11 +20,7 @@
 <body class="dark-edition">
   <div class="wrapper ">
     <div class="sidebar" data-color="purple" data-background-color="black" data-image="static/assets/img/sidebar.png">
-      <!--
-        Tip 1: You can change the color of the sidebar using: data-color="purple | azure | green | orange | danger"
 
-        Tip 2: you can also add an image using data-image tag
-    -->
       <div class="logo"><a href="http://www.creative-tim.com" class="simple-text logo-normal">
           RapiTickets
         </a></div>
@@ -150,7 +146,14 @@
   <script src="static/assets/js/plugins/bootstrap-notify.js"></script>
   <!-- Control Center for Material Dashboard: parallax effects, scripts for the example pages etc -->
   <script src="static/assets/js/material-dashboard.js?v=2.1.0"></script>
-  <script src="static/qr_generator.js"></script>
+  <!-- QR Generator -->
+  <script>
+    var new_qrcode = String(document.getElementById('new_qrcode').innerHTML);
+    $(function() {
+        $(".qr_code").attr("src", "https://chart.googleapis.com/chart?cht=qr&chl=" + new_qrcode + "&chs=160x160&chld=L|0");
+    });
+  </script>
+  
   <script>
     $(document).ready(function() {
       $().ready(function() {
