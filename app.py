@@ -48,7 +48,7 @@ def generate_and_send(uj_qr_value,uj_nev,uj_email):
     qr_img.save("tickets/current_qr.png")
 
     #                         x0, y0, x1, y1
-    img_rect = fitz.Rect(0, 100, 200, 200)
+    img_rect = fitz.Rect(255, 400, 355, 500)
     page.insertImage(img_rect, filename="tickets/current_qr.png", keep_proportion=True, align=1)
 
     document.save(outfile)
