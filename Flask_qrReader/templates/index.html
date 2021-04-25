@@ -2,9 +2,10 @@
 <html>
   <head>
     <title>Instascan</title>
-    <script type="text/javascript" src="js/instascan.min.js"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename = 'instascan.min.js') }}"></script>
   </head>
   <body>
+    <p>Qr code reader</p>
     <video id="preview"></video>
     <script type="text/javascript">
       let scanner = new Instascan.Scanner({ video: document.getElementById('preview') });
