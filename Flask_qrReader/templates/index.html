@@ -35,6 +35,7 @@
 
 
 <script type="module">
+
     import QrScanner from "{{ url_for('static', filename = 'nimiq_qr_scanner.js') }}";
     QrScanner.WORKER_PATH = "{{ url_for('static', filename = 'nimiq_qr_scanner_worker.js') }}";
 
@@ -44,6 +45,8 @@
     const fileQrResult = document.getElementById('file-qr-result');
 
     function chechQR(label, result) {
+        
+        //QR kód megmutatása
         label.textContent = result;
         label.style.color = 'teal';
         clearTimeout(label.highlightTimeout);
