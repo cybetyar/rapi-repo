@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Rapi jegy ellenőrző</title>
+</head>
+<body>
+<style>
+    hr {
+        margin-top: 32px;
+    }
+    input[type="file"] {
+        display: block;
+        margin-bottom: 16px;
+    }
+    div {
+        margin-bottom: 16px;
+    }
+    #flash-toggle {
+        display: none;
+    }
+</style>
+<h1>Rapi jegy ellenőrző</h1>
+<div>
+    <video id="qr-video"></video>
+    <br>
+    <label>
+        <input id="show-scan-region" type="checkbox">
+        Show scan region
+    </label>
+</div>
+<b>Detected QR code: </b>
+<span id="cam-qr-result">None</span>
+<hr>
+
+
+<script type="module">
+    import QrScanner from "{{ url_for('static', filename = 'nimiq_qr_scanner.js') }}";
+    QrScanner.WORKER_PATH = "{{ url_for('static', filename = 'nimiq_qr_scanner_worker.js') }}";
+
+    const video = document.getElementById('qr-video');
+    const flashState = document.getElementById('flash-state');
+    const camQrResult = document.getElementById('cam-qr-result');
+    const fileQrResult = document.getElementById('file-qr-result');
+
+    function chechQR(label, result) {
+        label.textContent = result;
+        label.style.color = 'teal';
+        clearTimeout(label.highlightTimeout);
+        label.highlightTimeout = setTimeout(() => label.style.color = 'inherit', 100);
+
+        //Ha legit a jegy zöld lesz a háttér
+        if (result === "1234567") {
+            document.body.style.backgroundColor = "green";
+        }else{
+            document.body.style.backgroundColor = "red";
+        }
+    }
+
+    // ####### Web Cam Scanning #######
+
+    QrScanner.hasCamera().then(hasCamera => camHasCamera.textContent = hasCamera);
+
+    const scanner = new QrScanner(video, result => chechQR(camQrResult, result), error => {
+        camQrResult.textContent = error;
+        camQrResult.style.color = 'inherit';
+    });
+    
+    scanner.start().then(() => {
+        scanner.hasFlash().then(hasFlash => {
+            camHasFlash.textContent = hasFlash;
+            if (hasFlash) {
+                flashToggle.style.display = 'inline-block';
+                flashToggle.addEventListener('click', () => {
+                    scanner.toggleFlash().then(() => flashState.textContent = scanner.isFlashOn() ? 'on' : 'off');
+                });
+            }
+        });
+    });
+
+    // for debugging
+    window.scanner = scanner;
+
+    document.getElementById('show-scan-region').addEventListener('change', (e) => {
+        const input = e.target;
+        const label = input.parentNode;
+        label.parentNode.insertBefore(scanner.$canvas, label.nextSibling);
+        scanner.$canvas.style.display = input.checked ? 'block' : 'none';
+    });
+        
+</script>
+</body>
+</html>
