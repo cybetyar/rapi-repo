@@ -90,10 +90,17 @@
                 <div class="card-header card-header-primary">
                   <h4 class="card-title ">Résztvevők</h4>
                   <p class="card-category">Résztvevők listája és kezelése</p>
+                  <div align="right">
+                  <label style="color:white">Rendezés</label>
+                  <select style="width:50px" onchange="if (this.selectedIndex==0) sortID();if (this.selectedIndex==1) sortABC();">
+                    <option><i class="fas fa-sort-numeric-down"></i>ID</option>
+                    <option><i class="fas fa-sort-alpha-down"></i>ABC</option>
+                  </select>
+                  </div>
                 </div>
                 <div class="card-body">
                   <div class="table-responsive">
-                    <table class="table">
+                    <table class="table" id="data_table">
                       <thead class=" text-primary">
                         <th>
                           ID
@@ -251,6 +258,76 @@
             //Do nothing :D
         }
       });
+    }
+
+    function sortID() {
+      var table, rows, switching, i, x, y, shouldSwitch;
+      table = document.getElementById("data_table");
+      switching = true;
+      /* Make a loop that will continue until
+      no switching has been done: */
+      while (switching) {
+        // Start by saying: no switching is done:
+        switching = false;
+        rows = table.rows;
+        /* Loop through all table rows (except the
+        first, which contains table headers): */
+        for (i = 1; i < (rows.length - 1); i++) {
+          // Start by saying there should be no switching:
+          shouldSwitch = false;
+          /* Get the two elements you want to compare,
+          one from current row and one from the next: */
+          x = rows[i].getElementsByTagName("TD")[0];
+          y = rows[i + 1].getElementsByTagName("TD")[0];
+          // Check if the two rows should switch place:
+          if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+            // If so, mark as a switch and break the loop:
+            shouldSwitch = true;
+            break;
+          }
+        }
+        if (shouldSwitch) {
+          /* If a switch has been marked, make the switch
+          and mark that a switch has been done: */
+          rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+          switching = true;
+        }
+      }
+    }
+
+    function sortABC() {
+      var table, rows, switching, i, x, y, shouldSwitch;
+      table = document.getElementById("data_table");
+      switching = true;
+      /* Make a loop that will continue until
+      no switching has been done: */
+      while (switching) {
+        // Start by saying: no switching is done:
+        switching = false;
+        rows = table.rows;
+        /* Loop through all table rows (except the
+        first, which contains table headers): */
+        for (i = 1; i < (rows.length - 1); i++) {
+          // Start by saying there should be no switching:
+          shouldSwitch = false;
+          /* Get the two elements you want to compare,
+          one from current row and one from the next: */
+          x = rows[i].getElementsByTagName("TD")[2];
+          y = rows[i + 1].getElementsByTagName("TD")[2];
+          // Check if the two rows should switch place:
+          if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+            // If so, mark as a switch and break the loop:
+            shouldSwitch = true;
+            break;
+          }
+        }
+        if (shouldSwitch) {
+          /* If a switch has been marked, make the switch
+          and mark that a switch has been done: */
+          rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+          switching = true;
+        }
+      }
     }
   </script>
   <!--   Core JS Files   -->
