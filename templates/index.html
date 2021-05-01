@@ -14,14 +14,17 @@
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css">
   <!-- CSS Files -->
   <link href="static/assets/css/material-dashboard.css?v=2.1.0" rel="stylesheet" />
-
 </head>
 
 <body class="dark-edition">
   <div class="wrapper ">
     <div class="sidebar" data-color="purple" data-background-color="black" data-image="static/assets/img/sidebar.png">
+      <!--
+        Tip 1: You can change the color of the sidebar using: data-color="purple | azure | green | orange | danger"
 
-      <div class="logo"><a href="http://www.creative-tim.com" class="simple-text logo-normal">
+        Tip 2: you can also add an image using data-image tag
+    -->
+      <div class="logo"><a href="#" class="simple-text logo-normal">
           RapiTickets
         </a></div>
       <div class="sidebar-wrapper">
@@ -39,7 +42,7 @@
             </a>
           </li>
           <li class="nav-item ">
-            <a class="nav-link" href="#">
+            <a class="nav-link" href="#" data-toggle="modal" data-target="#exampleModalCenter2">
               <i class="material-icons">person</i>
               <p>Beléptetés</p>
             </a>
@@ -70,6 +73,7 @@
                   </p>
                 </a>
                 <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
+                  <a class="dropdown-item" href="javascript:void(0)">Frissítés</a>
                   <a class="dropdown-item" href="javascript:void(0)">Kilépés</a>
                 </div>
               </li>
@@ -107,22 +111,22 @@
                           Jegy
                         </th>
                         <th>
-                          Küldés újra
+                          Módosítás
                         </th>
                       </thead>
                       <tbody>
                       {% for row in rows %}
                         <tr>
-                          <td>{{row["id"]}}</td>
-                          <td>{{row["nev"]}}</td>
-                          <td>{{row["email"]}}</td>
+                          <td class="current_id">{{row["id"]}}</td>
+                          <td class="current_nev">{{row["nev"]}}</td>
+                          <td class="current_email">{{row["email"]}}</td>
                           {% if row["kuldes"] == 0 %}
                               <td>Kézbesítve</td>
                           {% else %}
                               <td>Felhasználva</td>
                           {% endif %}
-                          <td class="text-primary">Megtekintés</td>
-                          <td><button class="btn btn-primary">Küldés</button></td>
+                          <td class="text-primary"><a style="cursor:pointer;" onclick="showQR({{row['id']}})">Megtekintés</a></td>
+                          <td><button class="btn btn-primary modositas" data-toggle="modal" data-target="#exampleModalCenter"><i class="fas fa-edit"></i></button></td>
                         </tr>
                       {%endfor%}
                       </tbody>
@@ -136,6 +140,119 @@
       </div>
     </div>
   </div>
+    <!-- Modal -->
+  <div class="modal fade" id="exampleModalCenter2" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-body">
+          <h4>Fejlesztés alatt!</h4>
+        </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <!-- Modal -->
+  <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLongTitle">Résztvevő adatainak módosítása</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <h4 id="span_msg"></h4>
+          <form onsubmit="updateGuest()">
+          <input id="update_id" type="hidden">
+            <label>Név</label>
+            <br>
+          <input type="text" id="update_nev" required>
+            <br><br>
+            <label>Email-cím</label>
+            <br>
+            <input type="email" id="update_email"required>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Mentés és küldés</button>
+        </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
+  <script>
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    async function plsleep() {
+      await sleep(6000);
+
+      // Sleep in loop
+      for (let i = 0; i < 5; i++) {
+        if (i === 3)
+          await sleep(6000);
+        console.log(i);
+      }
+    }
+
+    $(".modositas").click(function() {
+    var $row = $(this).closest("tr");    // Find the row
+    var $currid = $row.find(".current_id").text();
+    var $currnev = $row.find(".current_nev").text();
+    var $curremail = $row.find(".current_email").text(); // Find the text
+    document.getElementById('update_id').value = $currid;
+    document.getElementById('update_nev').placeholder = $currnev;
+    document.getElementById('update_email').placeholder = $curremail;
+    });
+    function updateGuest() {
+      event.preventDefault();
+      var newId = document.getElementById('update_id').value;
+      var newNev = document.getElementById('update_nev').value;
+      var newEmail = document.getElementById('update_email').value;
+      var update_url = "/update/" + newId;
+      var n_form_data = {'update_nev': newNev, 'update_email': newEmail};
+      var n_data = JSON.stringify(n_form_data);
+			$.ajax({
+					url : update_url,
+					type: 'POST',
+					dataType : 'json',
+					data : n_data,
+					contentType: 'application/json;charset=UTF-8',
+					cache: false,
+					processData:false,
+					success: function(){
+						 /*console.log(data);*/
+						 //document.getElementById('span_msg').innerHTML = "Módosítva!";
+						 //plsleep();
+                         alert('Módosítva!');
+						 location.reload();
+					},
+					error: function(){
+						 /*console.log("error");*/
+
+						 //document.getElementById('span_msg').innerHTML = "Módosítás - Error";
+						 //plsleep();
+                      alert('error');
+						 location.reload();
+					}
+					});
+    }
+
+    function showQR(id){
+      get_url = "/show/" + id;
+      $.ajax({
+        url: get_url,
+        type: 'GET',
+        dataType: 'json', // added data type
+        success: function(res) {
+            console.log(res);
+            //Do nothing :D
+        }
+      });
+    }
+  </script>
   <!--   Core JS Files   -->
   <script src="static/assets/js/core/jquery.min.js"></script>
   <script src="static/assets/js/core/popper.min.js"></script>
