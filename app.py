@@ -1,11 +1,10 @@
-from flask import Flask, render_template, request, url_for
+from flask import Flask, render_template, request, url_for, jsonify
 import webview
 import sys
 import threading
 import sqlite3
 from datetime import datetime
 from hashlib import sha256
-#pip3 install PyMuPDF
 import fitz
 import email, smtplib, ssl
 from email import encoders
@@ -15,6 +14,7 @@ from email.mime.text import MIMEText
 import os
 import qrcode
 from PIL import Image
+import json
 
 app = Flask(__name__)
 
@@ -27,13 +27,13 @@ def generate_and_send(uj_qr_value,uj_nev,uj_email):
     outfile = "tickets/" + uj_nev + ".pdf"
 
     #   X , Y
-    p_name = fitz.Point(50, 72)
+    p_name = fitz.Point(625, 75)
     name = uj_nev
-    page.insert_text(p_name, name, fontname="helv", fontsize=30, rotate=0)
+    page.insert_text(p_name, name, fontname="helv", fontsize=16, rotate=0)
 
-    p_date = fitz.Point(200, 150)
+    p_date = fitz.Point(625, 150)
     date = today.strftime('%F')
-    page.insert_text(p_date, date, fontname="helv", fontsize=30, rotate=0)
+    page.insert_text(p_date, date, fontname="helv", fontsize=16, rotate=0)
 
     #generate image from uj_qr_value
     qr = qrcode.QRCode(
@@ -54,13 +54,14 @@ def generate_and_send(uj_qr_value,uj_nev,uj_email):
     document.save(outfile)
     document.close()
 
+    #rapifeszt@protonmail.com/rapifeszt@gmail.com:Rz6ejLs87!z+vZ6
     smtp_server = "smtp.gmail.com"
     port = 587
     sender_email = "rapifeszt@gmail.com"
     password = "Rz6ejLs87!z+vZ6"
     receiver_email = uj_email
 
-    body = "Üdv Rapis!"
+    #body = "Üdv Rapis!"
     message = MIMEMultipart()
     message["From"] = sender_email
     message["To"] = receiver_email
@@ -96,9 +97,11 @@ def adatbazis():
     cursor = conn.cursor()
     cursor.execute("CREATE TABLE IF NOT EXISTS `jegyek` (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, nev TEXT, email TEXT NOT NULL, kuldes BOOLEAN,  datum TIMESTAMP NOT NULL)")
 
+
 @app.route('/')
 def index():
     adatbazis()
+    #sysmsg = ''
     conn = sqlite3.connect("rapi.db")
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
@@ -121,6 +124,50 @@ def uj_jegy():
         new_qrcode = sha256(str(current_id).encode('utf-8')).hexdigest()
     return render_template('uj_jegy.html', new_qrcode = new_qrcode)
 
+@app.route('/show/<id>', methods=["GET"])
+def show_qr(id):
+    if request.method == 'GET':
+        assert id == request.view_args['id']
+        show_qr_value = sha256(str(id).encode('utf-8')).hexdigest()
+        #generate image from uj_qr_value
+        show_qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_H,
+            box_size=10,
+            border=4,
+        )
+        show_qr.add_data(show_qr_value)
+        show_qr.make(fit=True)
+        show_qr_img = show_qr.make_image(fill_color="black", back_color="white").convert('RGB')
+        show_qr_img.save("tickets/show_qr.png")
+        show_im = Image.open('tickets/show_qr.png')
+        show_im.show()
+        os.remove("tickets/show_qr.png")
+        return index()
+
+@app.route('/update/<id>', methods = ['POST'])
+def update(id):
+    if request.method == 'POST':
+        assert id == request.view_args['id']
+        req_data = request.json
+
+        update_nev = req_data['update_nev']
+        update_email = req_data['update_email']
+
+        conn = sqlite3.connect("rapi.db")
+        cur = conn.cursor()
+
+        update_query = 'UPDATE jegyek SET nev = ?, email = ? WHERE id = ?'
+        cur.execute(update_query, (update_nev, update_email, id))
+        conn.commit()
+
+        conn.close()
+        update_qrcode = sha256(str(id).encode('utf-8')).hexdigest()
+        generate_and_send(update_qrcode, update_nev, update_email)
+        #sysmsg = 'Módosítva'
+        return jsonify(status = 'modositva')
+
+
 @app.route('/post_jegy', methods = ['POST'])
 def post_jegy():
     if request.method == 'POST':
@@ -135,10 +182,10 @@ def post_jegy():
                 cursor.execute("""INSERT INTO jegyek (nev,email,kuldes,datum)
                 VALUES(?,?,?,?)""",(uj_nev,uj_email,uj_kuldes,uj_datum) )
                 conn.commit()
-                msg = "Hozzaadva"
+                #sysmsg = "Hozzaadva"
         except:
             conn.rollback()
-            msg = "Error - Van baj"
+            #sysmsg = "Error - Van baj"
         finally:
             #return index(msg=msg) # ehhez majd kell def index(msg) -> return ... msg=msg
             generate_and_send(uj_qr_value,uj_nev,uj_email)
