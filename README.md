@@ -13,9 +13,9 @@ QR alapú jegy- és beléptető rendszer
 	-Install required python modules: 'sudo pip install <package>'<br/>
 	-Run the app: 'python3 app.py'<br/>
 ## TODO:<br/>
-  -Connection Check<br/>
-  -Remote update<br/>
-  -API<br/>
-  -Optimization (Make it a bit faster)<br/>
-  -Connect to the QR Scanner<br/>
-  -Documentation
+	  -Connection Check<br/>
+	  -Remote update<br/>
+	  -API<br/>
+	  -Optimization (Make it a bit faster)<br/>
+	  -Connect to the QR Scanner<br/>
+	  -Documentation
