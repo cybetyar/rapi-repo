@@ -39,7 +39,7 @@
             </a>
           </li>
           <li class="nav-item ">
-            <a class="nav-link" href="#">
+            <a class="nav-link" href="#" data-toggle="modal" data-target="#exampleModalCenter2">
               <i class="material-icons">person</i>
               <p>Beléptetés</p>
             </a>
@@ -70,6 +70,7 @@
                   </p>
                 </a>
                 <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
+                  <a class="dropdown-item" href="javascript:void(0)">Frissítés</a>
                   <a class="dropdown-item" href="javascript:void(0)">Kilépés</a>
                 </div>
               </li>
@@ -93,13 +94,13 @@
                       <div class="col-md-6">
                         <div class="form-group">
                           <label class="bmd-label-floating">Név</label>
-                          <input type="text" class="form-control" name="uj_nev">
+                          <input type="text" class="form-control" name="uj_nev" required>
                         </div>
                       </div>
                       <div class="col-md-6">
                         <div class="form-group">
                           <label class="bmd-label-floating">Email</label>
-                          <input type="text" class="form-control" name="uj_email">
+                          <input type="email" class="form-control" name="uj_email" required>
                         </div>
                       </div>
                     </div>
@@ -131,6 +132,17 @@
       </div>
     </div>
   </div>
+      <!-- Modal -->
+  <div class="modal fade" id="exampleModalCenter2" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-body">
+          <h4>Fejlesztés alatt!</h4>
+        </div>
+        </form>
+      </div>
+    </div>
+  </div>
   <!--   Core JS Files   -->
   <script src="static/assets/js/core/jquery.min.js"></script>
   <script src="static/assets/js/core/popper.min.js"></script>
@@ -154,7 +166,7 @@
         $(".qr_code").attr("src", "https://chart.googleapis.com/chart?cht=qr&chl=" + new_qrcode + "&chs=160x160&chld=L|0");
     });
   </script>
-  
+
   <script>
     $(document).ready(function() {
       $().ready(function() {
