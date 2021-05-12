@@ -62,7 +62,7 @@ def generate_and_send(uj_qr_value,uj_nev,uj_email):
     receiver_email = uj_email
 
     #body = "Üdv Rapis!"
-    message = MIMEMultipart()
+    message = MIMEMultipart('html')
     message["From"] = sender_email
     message["To"] = receiver_email
     message["Subject"] = "Rapifeszt jegy"
@@ -72,7 +72,7 @@ def generate_and_send(uj_qr_value,uj_nev,uj_email):
         html_string = f.read()
 
     with open(outfile, "rb") as attachment:
-        part = MIMEBase("application", "octet-stream")
+        part = MIMEBase("application", "pdf",Name=outfile)
         part.set_payload(attachment.read())
 
     encoders.encode_base64(part)
@@ -81,6 +81,8 @@ def generate_and_send(uj_qr_value,uj_nev,uj_email):
 
     message.attach(MIMEText(html_string, "html"))
     message.attach(part)
+
+
 
     session = smtplib.SMTP('smtp.gmail.com', 587)  # use gmail with port
     session.ehlo()
@@ -144,7 +146,7 @@ def show_qr(id):
         show_im.show()
         os.remove("tickets/show_qr.png")
         return index()
-
+#Mod
 @app.route('/update/<id>', methods = ['POST'])
 def update(id):
     if request.method == 'POST':
@@ -166,7 +168,7 @@ def update(id):
         generate_and_send(update_qrcode, update_nev, update_email)
         #sysmsg = 'Módosítva'
         return jsonify(status = 'modositva')
-
+#Mod vége
 
 @app.route('/post_jegy', methods = ['POST'])
 def post_jegy():
