@@ -39,9 +39,9 @@
             </a>
           </li>
           <li class="nav-item ">
-            <a class="nav-link" href="#" data-toggle="modal" data-target="#exampleModalCenter2">
-              <i class="material-icons">person</i>
-              <p>Beléptetés</p>
+            <a class="nav-link" href="#" data-toggle="modal" data-target="#exampleModalCenter2" onclick="osszesites();">
+              <i class="material-icons">analytics</i>
+              <p>Összesítés</p>
             </a>
           </li>
         </ul>
@@ -89,22 +89,33 @@
                   <p class="card-category">Új qr jegy generálása a megadott adatok alapján</p>
                 </div>
                 <div class="card-body">
+                  <br>
                   <form action = "{{ url_for('post_jegy') }}" method = "POST">
                     <div class="row">
-                      <div class="col-md-6">
+                      <div class="col-md-4">
                         <div class="form-group">
                           <label class="bmd-label-floating">Név</label>
                           <input type="text" class="form-control" name="uj_nev" required>
                         </div>
                       </div>
-                      <div class="col-md-6">
+                      <div class="col-md-4">
                         <div class="form-group">
                           <label class="bmd-label-floating">Email</label>
                           <input type="email" class="form-control" name="uj_email" required>
                         </div>
                       </div>
+                      <div class="col-md-4">
+                        <div class="form-group">
+                          <select name="uj_jegy_tipus" required>
+                            <option disabled>Jegy típus:</option>
+                            <option value="0">Online</option>
+                            <option value="1">Személyes</option>
+                          </select>
+                        </div>
+                      </div>
                     </div>
                     <input type="hidden" name="qr_code_value" value="{{ new_qrcode }}">
+                    <br>
                     <button type="submit" class="btn btn-primary pull-right">Jegy generálása</button>
                     <div class="clearfix"></div>
                   </form>
@@ -136,10 +147,49 @@
   <div class="modal fade" id="exampleModalCenter2" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
       <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Összesítés</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
         <div class="modal-body">
-          <h4>Fejlesztés alatt!</h4>
+          <div id="current_eur" style="font-size: 12px;"></div>
+         <table class="table">
+          <thead class=" text-primary">
+            <th></th>
+            <th>EUR (db)</th>
+            <th>HUF (db)</th>
+            <th>Összesen (HUF)</th>
+          </thead>
+          <tbody>
+          <tr>
+            <td>1. kör</td>
+            <td id="eur_1"></td>
+            <td id="huf_1"></td>
+            <td id="ossz_1"></td>
+          </tr>
+          <tr>
+            <td>2. kör</td>
+            <td id="eur_2"></td>
+            <td id="huf_2"></td>
+            <td id="ossz_2"></td>
+          </tr>
+          <tr>
+            <td>3. kör</td>
+            <td id="eur_3"></td>
+            <td id="huf_3"></td>
+            <td id="ossz_3"></td>
+          </tr>
+          <tr>
+            <td></td>
+            <td></td>
+            <td><strong>Összesen:</strong></td>
+            <td id="osszes_huf" style="border: 1px solid black; color:black;"></td>
+          </tr>
+          </tbody>
+         </table>
         </div>
-        </form>
       </div>
     </div>
   </div>
@@ -328,13 +378,53 @@
         });
       });
     });
+    function osszesites() {
+      document.getElementById('eur_1').innerHTML = "";
+      document.getElementById('huf_1').innerHTML = "";
+      document.getElementById('eur_2').innerHTML = "";
+      document.getElementById('huf_2').innerHTML = "";
+      document.getElementById('eur_3').innerHTML = "";
+      document.getElementById('huf_3').innerHTML = "";
+      document.getElementById('current_eur').innerHTML = "";
+      document.getElementById('ossz_1').innerHTML = "";
+      document.getElementById('ossz_2').innerHTML = "";
+      document.getElementById('ossz_3').innerHTML = "";
+      document.getElementById('osszes_huf').innerHTML = "";
+      $.ajax({
+        url: "/osszesites",
+        type: 'GET',
+        dataType: 'json',
+        cache: false,
+        success: function(response) {
+            var online_1 = response.online_1;
+            var online_2 = response.online_2;
+            var online_3 = response.online_3;
+            var szemelyes_1 = response.szemelyes_1;
+            var szemelyes_2 = response.szemelyes_2;
+            var szemelyes_3 = response.szemelyes_3;
+            document.getElementById('eur_1').innerHTML += online_1;
+            document.getElementById('huf_1').innerHTML += szemelyes_1;
+            document.getElementById('eur_2').innerHTML += online_2;
+            document.getElementById('huf_2').innerHTML += szemelyes_2;
+            document.getElementById('eur_3').innerHTML += online_3;
+            document.getElementById('huf_3').innerHTML += szemelyes_3;
+            var eur_price = response.eur;
+            document.getElementById('current_eur').innerHTML += "EUR árfolyam: " + "<strong>" + eur_price + "</stong>" + "Ft";
+            var ossz_1 = (online_1 * eur_price * 30) + (szemelyes_1 * 10000);
+            var ossz_2 = (online_2 * eur_price * 35) + (szemelyes_2 * 12000);
+            var ossz_3 = (online_3 * eur_price * 40) + (szemelyes_3 * 14000);
+            document.getElementById('ossz_1').innerHTML += ossz_1;
+            document.getElementById('ossz_2').innerHTML += ossz_2;
+            document.getElementById('ossz_3').innerHTML += ossz_3;
+            document.getElementById('osszes_huf').innerHTML += (ossz_1 + ossz_2 + ossz_3) + " Ft";
+        }
+      });
+    }
   </script>
   <script>
-    $(document).ready(function() {
-      // Javascript method's body can be found in assets/js/demos.js
-      md.initDashboardPageCharts();
-
-    });
+    window.addEventListener("offline",
+      ()=> alert("Hálózat nem elérhető!\nElőfordulhat, hogy a program egyes funkciói nem működnek megfelelően internet kapcsolat nélkül.")
+    );
   </script>
 </body>
 
