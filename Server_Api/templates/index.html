@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <title>RapiFeszt - Jegy ellenőrző</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <style>
+        hr {
+            margin-top: 32px;
+        }
+        input[type="file"] {
+            display: block;
+            margin-bottom: 16px;
+        }
+        div {
+            margin-bottom: 16px;
+        }
+        #flash-toggle {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+  <div align="center">
+    <h1>RapiTickets Beléptetés</h1>
+    <div class="card">
+        <video id="qr-video"></video>
+        <br>
+        <label>
+            <input id="show-scan-region" type="checkbox">
+            Show scan region
+        </label>
+    </div>
+    <b>Detected QR code: </b>
+    <span id="cam-qr-result">None</span>
+    <hr>
+  </div>
+  <script type="module">
+      //Adding jquery
+      var script = document.createElement('script');
+      script.src = 'https://code.jquery.com/jquery-3.4.1.min.js';
+      script.type = 'text/javascript';
+      document.getElementsByTagName('head')[0].appendChild(script);
+
+      var script2 = document.createElement('script');
+      script2.src = 'https://code.jquery.com/jquery-1.12.4.min.js';
+      script2.type = 'text/javascript';
+      document.getElementsByTagName('head')[0].appendChild(script2);
+
+
+      import QrScanner from "{{ url_for('static', filename = 'nimiq_qr_scanner.js') }}";
+      QrScanner.WORKER_PATH = "{{ url_for('static', filename = 'nimiq_qr_scanner_worker.js') }}";
+
+      const video = document.getElementById('qr-video');
+      const flashState = document.getElementById('flash-state');
+      const camQrResult = document.getElementById('cam-qr-result');
+      const fileQrResult = document.getElementById('file-qr-result');
+
+      function chechQR(label, result) {
+
+          //QR kód megmutatása
+          label.textContent = result;
+          label.style.color = 'teal';
+          clearTimeout(label.highlightTimeout);
+          label.highlightTimeout = setTimeout(() => label.style.color = 'inherit', 100);
+
+          //Ha legit(sha256 hash) a jegy zöld lesz a háttér
+          let regexp = "^[A-Fa-f0-9]{64}$";
+          // here I have used 'g' which means global search
+          const verify = new RegExp(regexp, 'g').test(result);
+          //verify = String(result).match(regexp);
+          if (verify) {
+              document.body.style.backgroundColor = "green";
+              //Post result to the server
+              var raw_data = {'value': result};
+              var data = JSON.stringify(raw_data);
+              $.ajax({
+                  url : '/tickets/value',
+                  type: 'POST',
+                  dataType : 'json',
+                  data : data,
+                  contentType: 'application/json;charset=UTF-8',
+                  cache: false,
+                  success: function(resp){
+                     /*console.log(data);*/
+                    alert(resp.status);
+                  },
+                  error: function(req, status, err){
+                     /*console.log("error");*/
+                    alert(status, err);
+                  }
+                  });
+          }else{
+              document.body.style.backgroundColor = "red";
+              alert("Érvénytelen jegy");
+          }
+      }
+
+      // ####### Web Cam Scanning #######
+
+      QrScanner.hasCamera().then(hasCamera => camHasCamera.textContent = hasCamera);
+
+      const scanner = new QrScanner(video, result => chechQR(camQrResult, result), error => {
+          camQrResult.textContent = error;
+          camQrResult.style.color = 'inherit';
+      });
+
+      scanner.start().then(() => {
+          scanner.hasFlash().then(hasFlash => {
+              camHasFlash.textContent = hasFlash;
+              if (hasFlash) {
+                  flashToggle.style.display = 'inline-block';
+                  flashToggle.addEventListener('click', () => {
+                      scanner.toggleFlash().then(() => flashState.textContent = scanner.isFlashOn() ? 'on' : 'off');
+                  });
+              }
+          });
+      });
+
+      // for debugging
+      window.scanner = scanner;
+
+      document.getElementById('show-scan-region').addEventListener('change', (e) => {
+          const input = e.target;
+          const label = input.parentNode;
+          label.parentNode.insertBefore(scanner.$canvas, label.nextSibling);
+          scanner.$canvas.style.display = input.checked ? 'block' : 'none';
+      });
+
+  </script>
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+  <script type="text/javascript" src="static/main.js"></script>
+</body>
+</html>
