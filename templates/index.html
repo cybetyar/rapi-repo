@@ -14,6 +14,67 @@
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css">
   <!-- CSS Files -->
   <link href="static/assets/css/material-dashboard.css?v=2.1.0" rel="stylesheet" />
+  <style>
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+  }
+
+  .switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    -webkit-transition: .4s;
+    transition: .4s;
+  }
+
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
+  }
+
+  input:checked + .slider {
+    background-color: #5e62ce;
+  }
+
+  input:focus + .slider {
+    box-shadow: 0 0 1px #5e62ce;
+  }
+
+  input:checked + .slider:before {
+    -webkit-transform: translateX(26px);
+    -ms-transform: translateX(26px);
+    transform: translateX(26px);
+  }
+
+  /* Rounded sliders */
+  .slider.round {
+    border-radius: 34px;
+  }
+
+  .slider.round:before {
+    border-radius: 50%;
+  }
+  </style>
 </head>
 
 <body class="dark-edition">
@@ -42,10 +103,18 @@
             </a>
           </li>
           <li class="nav-item ">
-            <a class="nav-link" href="#" data-toggle="modal" data-target="#exampleModalCenter2">
-              <i class="material-icons">person</i>
-              <p>Beléptetés</p>
+            <a class="nav-link" href="#" data-toggle="modal" data-target="#exampleModalCenter2" onclick="osszesites();">
+              <i class="material-icons">analytics</i>
+              <p>Összesítés</p>
             </a>
+          </li>
+          <li class="nav-item " align="center" style="margin-top:100%;">
+            <p style="font-size:15px;color:white;">Beléptetés</p>
+            <label class="switch">
+              <!--<p style="right:123%;font-size:15px;">Beléptetés</p>-->
+              <input type="checkbox" id="beleptetes">
+              <span class="slider round"></span>
+            </label>
           </li>
         </ul>
       </div>
@@ -115,6 +184,9 @@
                           Státusz
                         </th>
                         <th>
+                          Típus
+                        </th>
+                        <th>
                           Jegy
                         </th>
                         <th>
@@ -123,15 +195,22 @@
                       </thead>
                       <tbody>
                       {% for row in rows %}
-                        <tr>
-                          <td class="current_id">{{row["id"]}}</td>
+                        <tr id="data_table">
+                          <td class="current_id" data-qr="{{row['qr_kod']}}" data-id='{{row["id"]}}' id="{{row['id']}}">{{row["id"]}}</td>
                           <td class="current_nev">{{row["nev"]}}</td>
                           <td class="current_email">{{row["email"]}}</td>
-                          {% if row["kuldes"] == 0 %}
+                          {% if row["statusz"] == 0 %}
                               <td>Kézbesítve</td>
                           {% else %}
                               <td>Felhasználva</td>
                           {% endif %}
+                          <td hidden>{{row["qr_kod"]}}</td>
+                          {% if row["jegy_tipus"] == 0 %}
+                              <td>Online</td>
+                          {% else %}
+                              <td>Személyes</td>
+                          {% endif %}
+                          <td id="qr_value" hidden>{{row["qr_kod"]}}</td>
                           <td class="text-primary"><a style="cursor:pointer;" onclick="showQR({{row['id']}})">Megtekintés</a></td>
                           <td><button class="btn btn-primary modositas" data-toggle="modal" data-target="#exampleModalCenter"><i class="fas fa-edit"></i></button></td>
                         </tr>
@@ -151,10 +230,49 @@
   <div class="modal fade" id="exampleModalCenter2" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
       <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Összesítés</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
         <div class="modal-body">
-          <h4>Fejlesztés alatt!</h4>
+          <div id="current_eur" style="font-size: 12px;"></div>
+         <table class="table">
+          <thead class=" text-primary">
+            <th></th>
+            <th>EUR (db)</th>
+            <th>HUF (db)</th>
+            <th>Összesen (HUF)</th>
+          </thead>
+          <tbody>
+          <tr>
+            <td>1. kör</td>
+            <td id="eur_1"></td>
+            <td id="huf_1"></td>
+            <td id="ossz_1"></td>
+          </tr>
+          <tr>
+            <td>2. kör</td>
+            <td id="eur_2"></td>
+            <td id="huf_2"></td>
+            <td id="ossz_2"></td>
+          </tr>
+          <tr>
+            <td>3. kör</td>
+            <td id="eur_3"></td>
+            <td id="huf_3"></td>
+            <td id="ossz_3"></td>
+          </tr>
+          <tr>
+            <td></td>
+            <td></td>
+            <td><strong>Összesen:</strong></td>
+            <td id="osszes_huf" style="border: 1px solid black; color:black;"></td>
+          </tr>
+          </tbody>
+         </table>
         </div>
-        </form>
       </div>
     </div>
   </div>
@@ -179,6 +297,14 @@
             <label>Email-cím</label>
             <br>
             <input type="email" id="update_email"required>
+            <br><br>
+            <label>Jegy típus:</label>
+            <br>
+            <select id="uj_jegy_tipus" required>
+              <option disabled>Válassz!</option>
+              <option value="0">Online</option>
+              <option value="1">Személyes</option>
+            </select>
         </div>
         <div class="modal-footer">
           <button type="submit" class="btn btn-primary">Mentés és küldés</button>
@@ -208,7 +334,7 @@
     var $row = $(this).closest("tr");    // Find the row
     var $currid = $row.find(".current_id").text();
     var $currnev = $row.find(".current_nev").text();
-    var $curremail = $row.find(".current_email").text(); // Find the text
+    var $curremail = $row.find(".current_email").text();
     document.getElementById('update_id').value = $currid;
     document.getElementById('update_nev').placeholder = $currnev;
     document.getElementById('update_email').placeholder = $curremail;
@@ -218,8 +344,9 @@
       var newId = document.getElementById('update_id').value;
       var newNev = document.getElementById('update_nev').value;
       var newEmail = document.getElementById('update_email').value;
+      var jegy_tipus = document.getElementById('uj_jegy_tipus').value;
       var update_url = "/update/" + newId;
-      var n_form_data = {'update_nev': newNev, 'update_email': newEmail};
+      var n_form_data = {'update_nev': newNev, 'update_email': newEmail, 'update_jegy_tipus': jegy_tipus};
       var n_data = JSON.stringify(n_form_data);
 			$.ajax({
 					url : update_url,
@@ -328,6 +455,107 @@
           switching = true;
         }
       }
+    }
+
+    //TODO:
+    //get used qr values in list
+    //which qr is in list -> UPDATE SET status=True WHERE id=id
+    //where status=True -> Change the td's background (to green)
+    function getUsedQR() {
+      //Get already used tickets' qr values
+      var get_url = "https://rapifeszt.hu/tickets/value";
+      $.ajax({
+      url: get_url,
+      dataType: 'json',
+      type: 'get',
+      cache:false,
+      success: function(data){
+         /*console.log(data);*/
+         var used_list = [];
+         $.each(data, function(index, value){
+             /*console.log(value);*/
+             used_list.push(value.qr);
+             var table_div = $('#data_table');
+             table_div.find("td").each(function () {
+                var qr_qr = $(this).data('qr');
+                var qr_id = $(this).data('id');
+                if (qr_qr == value.qr) {
+                  qr_div = document.getElementById(qr_id);
+                  qr_div.parentNode.classList.add("qr_node");
+                }
+                })
+            var qr_node = document.getElementsByClassName('qr_node'); // get all elements
+            for(var i = 0; i < qr_node.length; i++){
+              qr_node[i].style.backgroundColor = 'rgba(107, 247, 188, 0.2)';
+              qr_node[i].style.borderRadius = "25px";
+            }
+         });
+         //alert(used_list);
+      },
+      error: function(req, status, err){
+         /*console.log("error");*/
+          alert(status, err);
+      }
+      });
+    }
+
+    //sleep(5000).then(() => {
+    //  getUsedQR();
+    //});
+
+
+    //Beléptetés - Toggle event
+    $('#beleptetes').on('click', function(){
+      if ( $(this).is(':checked') ) {
+          //alert("Toggle on");
+          getUsedQR();
+      }
+      else {
+          location.reload();
+      }
+    });
+
+    function osszesites() {
+      document.getElementById('eur_1').innerHTML = "";
+      document.getElementById('huf_1').innerHTML = "";
+      document.getElementById('eur_2').innerHTML = "";
+      document.getElementById('huf_2').innerHTML = "";
+      document.getElementById('eur_3').innerHTML = "";
+      document.getElementById('huf_3').innerHTML = "";
+      document.getElementById('current_eur').innerHTML = "";
+      document.getElementById('ossz_1').innerHTML = "";
+      document.getElementById('ossz_2').innerHTML = "";
+      document.getElementById('ossz_3').innerHTML = "";
+      document.getElementById('osszes_huf').innerHTML = "";
+      $.ajax({
+        url: "/osszesites",
+        type: 'GET',
+        dataType: 'json',
+        cache: false,
+        success: function(response) {
+            var online_1 = response.online_1;
+            var online_2 = response.online_2;
+            var online_3 = response.online_3;
+            var szemelyes_1 = response.szemelyes_1;
+            var szemelyes_2 = response.szemelyes_2;
+            var szemelyes_3 = response.szemelyes_3;
+            document.getElementById('eur_1').innerHTML += online_1;
+            document.getElementById('huf_1').innerHTML += szemelyes_1;
+            document.getElementById('eur_2').innerHTML += online_2;
+            document.getElementById('huf_2').innerHTML += szemelyes_2;
+            document.getElementById('eur_3').innerHTML += online_3;
+            document.getElementById('huf_3').innerHTML += szemelyes_3;
+            var eur_price = response.eur;
+            document.getElementById('current_eur').innerHTML += "EUR árfolyam: " + "<strong>" + eur_price + "</stong>" + "Ft";
+            var ossz_1 = (online_1 * eur_price * 30) + (szemelyes_1 * 10000);
+            var ossz_2 = (online_2 * eur_price * 35) + (szemelyes_2 * 12000);
+            var ossz_3 = (online_3 * eur_price * 40) + (szemelyes_3 * 14000);
+            document.getElementById('ossz_1').innerHTML += ossz_1;
+            document.getElementById('ossz_2').innerHTML += ossz_2;
+            document.getElementById('ossz_3').innerHTML += ossz_3;
+            document.getElementById('osszes_huf').innerHTML += (ossz_1 + ossz_2 + ossz_3) + " Ft";
+        }
+      });
     }
   </script>
   <!--   Core JS Files   -->
@@ -510,11 +738,9 @@
     });
   </script>
   <script>
-    $(document).ready(function() {
-      // Javascript method's body can be found in assets/js/demos.js
-      md.initDashboardPageCharts();
-
-    });
+    window.addEventListener("offline",
+      ()=> alert("Hálózat nem elérhető!\nElőfordulhat, hogy a program egyes funkciói nem működnek megfelelően internet kapcsolat nélkül.")
+    );
   </script>
 </body>
 
