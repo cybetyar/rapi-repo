@@ -15,6 +15,7 @@ import os
 import qrcode
 from PIL import Image
 import json
+from currency_converter import CurrencyConverter
 
 app = Flask(__name__)
 
@@ -97,7 +98,7 @@ def adatbazis():
     global conn, cursor
     conn = sqlite3.connect('rapi.db')
     cursor = conn.cursor()
-    cursor.execute("CREATE TABLE IF NOT EXISTS `jegyek` (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, nev TEXT, email TEXT NOT NULL, kuldes BOOLEAN,  datum TIMESTAMP NOT NULL)")
+    cursor.execute("CREATE TABLE IF NOT EXISTS `jegyek` (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, nev TEXT, email TEXT NOT NULL, statusz BOOLEAN, qr_kod TEXT, jegy_tipus INTEGER, datum TIMESTAMP NOT NULL)")
 
 
 @app.route('/')
@@ -155,12 +156,13 @@ def update(id):
 
         update_nev = req_data['update_nev']
         update_email = req_data['update_email']
+        update_jegy_tipus = req_data['update_jegy_tipus']
 
         conn = sqlite3.connect("rapi.db")
         cur = conn.cursor()
 
-        update_query = 'UPDATE jegyek SET nev = ?, email = ? WHERE id = ?'
-        cur.execute(update_query, (update_nev, update_email, id))
+        update_query = 'UPDATE jegyek SET nev = ?, email = ?, jegy_tipus = ? WHERE id = ?'
+        cur.execute(update_query, (update_nev, update_email, update_jegy_tipus, id))
         conn.commit()
 
         conn.close()
@@ -178,11 +180,12 @@ def post_jegy():
             uj_email = request.form['uj_email']
             uj_qr_value = request.form['qr_code_value']
             uj_datum = datetime.now()
-            uj_kuldes = False
+            uj_statusz = False
+            uj_jegy_tipus = request.form['uj_jegy_tipus']
             with sqlite3.connect("rapi.db") as conn:
                 cursor = conn.cursor()
-                cursor.execute("""INSERT INTO jegyek (nev,email,kuldes,datum)
-                VALUES(?,?,?,?)""",(uj_nev,uj_email,uj_kuldes,uj_datum) )
+                cursor.execute("""INSERT INTO jegyek (nev,email,statusz,qr_kod,jegy_tipus,datum)
+                VALUES(?,?,?,?,?,?)""",(uj_nev,uj_email,uj_statusz,uj_qr_value,uj_jegy_tipus,uj_datum) )
                 conn.commit()
                 #sysmsg = "Hozzaadva"
         except:
@@ -194,8 +197,43 @@ def post_jegy():
             return index()
             conn.close()
 
+@app.route('/osszesites', methods=["GET"])
+def osszesites():
+    if request.method == 'GET':
+        conn = sqlite3.connect("rapi.db")
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute("select jegy_tipus from jegyek group by id")
+        jegy_list = []
+        rows = cursor.fetchall();
+        for row in rows:
+            jegy_list.append([x for x in row])
+        flattened = [val for sublist in jegy_list for val in sublist]
+        c = CurrencyConverter()
+        current_eur = c.convert(1, 'EUR', 'HUF')
+        if len(flattened) < 101:
+            online = flattened.count(0)
+            szemelyes = flattened.count(1)
+            return jsonify(online_1=online,szemelyes_1=szemelyes,online_2="",szemelyes_2="",online_3="",szemelyes_3="",eur=current_eur)
+        elif 101 < len(flattened) < 251:
+            online_1 = flattened[:100].count(0)
+            szemelyes_1 = flattened[:100].count(1)
+            online_2 = flattened[100::250].count(0)
+            szemelyes_2 = flattened[100::250].count(1)
+            return jsonify(online_1=online_1, szemelyes_1=szemelyes_1, online_2=online_2, szemelyes_2=szemelyes_2, online_3="",
+                           szemelyes_3="",eur=current_eur)
+        else:
+            online_1 = flattened[:100].count(0)
+            szemelyes_1 = flattened[:100].count(1)
+            online_2 = flattened[100::250].count(0)
+            szemelyes_2 = flattened[100::250].count(1)
+            online_3 = flattened[250:].count(0)
+            szemelyes_3 = flattened[250:].count(1)
+            return jsonify(online_1=online_1, szemelyes_1=szemelyes_1, online_2=online_2, szemelyes_2=szemelyes_2, online_3=online_3,
+                           szemelyes_3=online_3,eur=current_eur)
+
 def start_server():
-    app.run(host='0.0.0.0', port=80)
+    app.run(host='0.0.0.0', port=2491)
 
 if __name__ == '__main__':
 
@@ -203,6 +241,6 @@ if __name__ == '__main__':
     t.daemon = True
     t.start()
 
-    webview.create_window("RapiTickets", "http://localhost/", min_size=(1250, 650))
+    webview.create_window("RapiTickets", "http://localhost:2491", min_size=(1250, 650))
     webview.start()
     sys.exit()
