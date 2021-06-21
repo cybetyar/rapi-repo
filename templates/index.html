@@ -738,9 +738,12 @@
     });
   </script>
   <script>
-    window.addEventListener("offline",
-      ()=> alert("Hálózat nem elérhető!\nElőfordulhat, hogy a program egyes funkciói nem működnek megfelelően internet kapcsolat nélkül.")
-    );
+    var ifConnected = window.navigator.onLine;
+    if (ifConnected) {
+      //Do nothing
+    } else {
+      alert('Nincs internet kapcsolat');
+    }
   </script>
 </body>
 
