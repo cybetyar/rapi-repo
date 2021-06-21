@@ -211,24 +211,24 @@ def osszesites():
         flattened = [val for sublist in jegy_list for val in sublist]
         c = CurrencyConverter()
         current_eur = c.convert(1, 'EUR', 'HUF')
-        if len(flattened) < 101:
+        if len(flattened) < 52:
             online = flattened.count(0)
             szemelyes = flattened.count(1)
             return jsonify(online_1=online,szemelyes_1=szemelyes,online_2="",szemelyes_2="",online_3="",szemelyes_3="",eur=current_eur)
-        elif 101 < len(flattened) < 251:
-            online_1 = flattened[:100].count(0)
-            szemelyes_1 = flattened[:100].count(1)
-            online_2 = flattened[100::250].count(0)
-            szemelyes_2 = flattened[100::250].count(1)
+        elif 52 < len(flattened) < 251:
+            online_1 = flattened[:51].count(0)
+            szemelyes_1 = flattened[:51].count(1)
+            online_2 = flattened[51::250].count(0)
+            szemelyes_2 = flattened[51::250].count(1)
             return jsonify(online_1=online_1, szemelyes_1=szemelyes_1, online_2=online_2, szemelyes_2=szemelyes_2, online_3="",
                            szemelyes_3="",eur=current_eur)
         else:
-            online_1 = flattened[:100].count(0)
-            szemelyes_1 = flattened[:100].count(1)
-            online_2 = flattened[100::250].count(0)
-            szemelyes_2 = flattened[100::250].count(1)
-            online_3 = flattened[250:].count(0)
-            szemelyes_3 = flattened[250:].count(1)
+            online_1 = flattened[:51].count(0)
+            szemelyes_1 = flattened[:51].count(1)
+            online_2 = flattened[51::250].count(0)
+            szemelyes_2 = flattened[51::250].count(1)
+            online_3 = flattened[51:].count(0)
+            szemelyes_3 = flattened[51:].count(1)
             return jsonify(online_1=online_1, szemelyes_1=szemelyes_1, online_2=online_2, szemelyes_2=szemelyes_2, online_3=online_3,
                            szemelyes_3=online_3,eur=current_eur)
 
