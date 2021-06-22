@@ -218,8 +218,8 @@ def osszesites():
         elif 52 < len(flattened) < 251:
             online_1 = flattened[:51].count(0)
             szemelyes_1 = flattened[:51].count(1)
-            online_2 = flattened[51::250].count(0)
-            szemelyes_2 = flattened[51::250].count(1)
+            online_2 = flattened[51:].count(0)
+            szemelyes_2 = flattened[51:].count(1)
             return jsonify(online_1=online_1, szemelyes_1=szemelyes_1, online_2=online_2, szemelyes_2=szemelyes_2, online_3="",
                            szemelyes_3="",eur=current_eur)
         else:
@@ -227,10 +227,10 @@ def osszesites():
             szemelyes_1 = flattened[:51].count(1)
             online_2 = flattened[51::250].count(0)
             szemelyes_2 = flattened[51::250].count(1)
-            online_3 = flattened[51:].count(0)
-            szemelyes_3 = flattened[51:].count(1)
+            online_3 = flattened[250:].count(0)
+            szemelyes_3 = flattened[250:].count(1)
             return jsonify(online_1=online_1, szemelyes_1=szemelyes_1, online_2=online_2, szemelyes_2=szemelyes_2, online_3=online_3,
-                           szemelyes_3=online_3,eur=current_eur)
+                           szemelyes_3=szemelyes_3,eur=current_eur)
 
 def start_server():
     app.run(host='0.0.0.0', port=2491)
