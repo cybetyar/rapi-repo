@@ -499,18 +499,15 @@
       });
     }
 
-    //sleep(5000).then(() => {
-    //  getUsedQR();
-    //});
-
-
     //Beléptetés - Toggle event
     $('#beleptetes').on('click', function(){
       if ( $(this).is(':checked') ) {
           //alert("Toggle on");
-          getUsedQR();
+          //run getUserQR(); in every 5 sec
+          var QRloop = setInterval(getUsedQR, 5000);
       }
       else {
+          clearInterval(QRloop);
           location.reload();
       }
     });
