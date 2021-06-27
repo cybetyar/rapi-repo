@@ -80,13 +80,8 @@
 <body class="dark-edition">
   <div class="wrapper ">
     <div class="sidebar" data-color="purple" data-background-color="black" data-image="static/assets/img/sidebar.png">
-      <!--
-        Tip 1: You can change the color of the sidebar using: data-color="purple | azure | green | orange | danger"
-
-        Tip 2: you can also add an image using data-image tag
-    -->
       <div class="logo"><a href="#" class="simple-text logo-normal">
-          RapiTickets
+        <strong>RapiTickets</strong>
         </a></div>
       <div class="sidebar-wrapper">
         <ul class="nav">
@@ -206,9 +201,15 @@
                           {% endif %}
                           <td hidden>{{row["qr_kod"]}}</td>
                           {% if row["jegy_tipus"] == 0 %}
-                              <td>Online</td>
+                              <td>Bérlet (Online)</td>
+                          {% elif row["jegy_tipus"] == 1 %}
+                              <td>Bérlet (Személyes)</td>
+                          {% elif row["jegy_tipus"] == 2 %}
+                              <td>Napijegy (Online)</td>
+                          {% elif row["jegy_tipus"] == 3 %}
+                              <td>Napijegy (Személyes)</td>
                           {% else %}
-                              <td>Személyes</td>
+                              <td>Egyéb</td>
                           {% endif %}
                           <td id="qr_value" hidden>{{row["qr_kod"]}}</td>
                           <td class="text-primary"><a style="cursor:pointer;" onclick="showQR({{row['id']}})">Megtekintés</a></td>
@@ -231,7 +232,7 @@
     <div class="modal-dialog modal-dialog-centered" role="document">
       <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Összesítés</h5>
+        <h5 class="modal-title">Statisztika</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -263,6 +264,12 @@
             <td id="eur_3"></td>
             <td id="huf_3"></td>
             <td id="ossz_3"></td>
+          </tr>
+          <tr>
+            <td>Napijegy</td>
+            <td id="napi_online"></td>
+            <td id="napi_szemelyes"></td>
+            <td id="napi_ossz"></td>
           </tr>
           <tr>
             <td></td>
@@ -499,6 +506,11 @@
       });
     }
 
+    //sleep(5000).then(() => {
+    //  getUsedQR();
+    //});
+
+
     //Beléptetés - Toggle event
     $('#beleptetes').on('click', function(){
       if ( $(this).is(':checked') ) {
@@ -524,6 +536,9 @@
       document.getElementById('ossz_2').innerHTML = "";
       document.getElementById('ossz_3').innerHTML = "";
       document.getElementById('osszes_huf').innerHTML = "";
+      document.getElementById('napi_online').innerHTML = "";
+      document.getElementById('napi_szemelyes').innerHTML = "";
+      document.getElementById('napi_ossz').innerHTML = "";
       $.ajax({
         url: "/osszesites",
         type: 'GET',
@@ -536,6 +551,8 @@
             var szemelyes_1 = response.szemelyes_1;
             var szemelyes_2 = response.szemelyes_2;
             var szemelyes_3 = response.szemelyes_3;
+            var napi_o = response.napi_online;
+            var napi_sz = response.napi_szemelyes;
             document.getElementById('eur_1').innerHTML += online_1;
             document.getElementById('huf_1').innerHTML += szemelyes_1;
             document.getElementById('eur_2').innerHTML += online_2;
@@ -550,7 +567,12 @@
             document.getElementById('ossz_1').innerHTML += ossz_1;
             document.getElementById('ossz_2').innerHTML += ossz_2;
             document.getElementById('ossz_3').innerHTML += ossz_3;
-            document.getElementById('osszes_huf').innerHTML += (ossz_1 + ossz_2 + ossz_3) + " Ft";
+            document.getElementById('napi_online').innerHTML = napi_o;
+            document.getElementById('napi_szemelyes').innerHTML = napi_sz;
+            var napi_osszes = (napi_o * eur_price * 15) + (napi_sz * 5000);
+            document.getElementById('napi_ossz').innerHTML = napi_osszes;
+            document.getElementById('osszes_huf').innerHTML += (ossz_1 + ossz_2 + ossz_3 + napi_osszes) + " Ft";
+
         }
       });
     }
