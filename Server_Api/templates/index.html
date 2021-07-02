@@ -66,8 +66,12 @@
 
           //Ha legit(sha256 hash) a jegy zöld lesz a háttér
           let regexp = "^[A-Fa-f0-9]{64}$";
+          //Legit Napijegy
+          let regexp_napi = "^[A-Fa-f0-9]{64}n$";
           // here I have used 'g' which means global search
           const verify = new RegExp(regexp, 'g').test(result);
+
+          const verify_napi = new RegExp(regexp_napi, 'g').test(result);
           //verify = String(result).match(regexp);
           if (verify) {
               document.body.style.backgroundColor = "green";
@@ -90,7 +94,28 @@
                     alert(status, err);
                   }
                   });
-          }else{
+          } else if (verify_napi) {
+            document.body.style.backgroundColor = "green";
+            //Post result to the server
+            var raw_data = {'value': result};
+            var data = JSON.stringify(raw_data);
+            $.ajax({
+                url : '/tickets/value',
+                type: 'POST',
+                dataType : 'json',
+                data : data,
+                contentType: 'application/json;charset=UTF-8',
+                cache: false,
+                success: function(resp){
+                   /*console.log(data);*/
+                  alert("Ez egy napijegy");
+                },
+                error: function(req, status, err){
+                   /*console.log("error");*/
+                  alert(status, err);
+                }
+                });
+          } else{
               document.body.style.backgroundColor = "red";
               alert("Érvénytelen jegy");
           }
