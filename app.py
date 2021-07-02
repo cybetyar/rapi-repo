@@ -170,7 +170,6 @@ def update(id):
         generate_and_send(update_qrcode, update_nev, update_email)
         #sysmsg = 'Módosítva'
         return jsonify(status = 'modositva')
-#Mod vége
 
 @app.route('/post_jegy', methods = ['POST'])
 def post_jegy():
@@ -178,10 +177,13 @@ def post_jegy():
         try:
             uj_nev = request.form['uj_nev']
             uj_email = request.form['uj_email']
-            uj_qr_value = request.form['qr_code_value']
             uj_datum = datetime.now()
             uj_statusz = False
             uj_jegy_tipus = request.form['uj_jegy_tipus']
+            if uj_jegy_tipus == '2' or uj_jegy_tipus == '3':
+                uj_qr_value = request.form['qr_code_value'] + 'n'
+            else:
+                uj_qr_value = request.form['qr_code_value']
             with sqlite3.connect("rapi.db") as conn:
                 cursor = conn.cursor()
                 cursor.execute("""INSERT INTO jegyek (nev,email,statusz,qr_kod,jegy_tipus,datum)
