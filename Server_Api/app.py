@@ -13,7 +13,7 @@ login_manager.login_view = 'login'
 login_manager.init_app(app)
 
 users = {
-'admin': {'password': 'R4P1F35ZT21!'}
+'admin': {'password': 'XXXXXX'}
 }
 
 
