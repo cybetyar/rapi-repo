@@ -58,8 +58,8 @@ def generate_and_send(uj_qr_value,uj_nev,uj_email):
     #rapifeszt@protonmail.com/rapifeszt@gmail.com:Rz6ejLs87!z+vZ6
     smtp_server = "smtp.gmail.com"
     port = 587
-    sender_email = "rapifeszt@gmail.com"
-    password = "Rz6ejLs87!z+vZ6"
+    sender_email = "xxxxxxx@gmail.com"
+    password = "XXXXXXXXXXXXX"
     receiver_email = uj_email
 
     #body = "Üdv Rapis!"
