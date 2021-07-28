@@ -55,7 +55,7 @@ def generate_and_send(uj_qr_value,uj_nev,uj_email):
     document.save(outfile)
     document.close()
 
-    #rapifeszt@protonmail.com/rapifeszt@gmail.com:Rz6ejLs87!z+vZ6
+    #@protonmail.com/@gmail.com
     smtp_server = "smtp.gmail.com"
     port = 587
     sender_email = "xxxxxxx@gmail.com"
